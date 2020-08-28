@@ -11,7 +11,7 @@ class SkeletonClass
      */
     public function __construct()
     {
-        // constructor body
+        (new PhoneNumber('phoneNumber'))->isValid();
     }
 
     /**
