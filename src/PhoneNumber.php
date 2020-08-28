@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace MonElDeeras\SlPhoneNumber;
-
 
 use InvalidArgumentException;
 
@@ -11,7 +11,11 @@ class PhoneNumber
     private $areaCode = [
         '063' => ['province' => 'Eastern', 'district' => 'Ampara', 'area' => 'Ampara'],
         '025' => ['province' => 'North Central', 'district' => 'Anuradhapura', 'area' => 'Anuradhapura'],
-        '036' => ['province' => 'Western, Sabaragamuwa', 'district' => 'colombo, Kegalle, Rathnapura', 'area' => 'Avissawella'],
+        '036' => [
+            'province' => 'Western, Sabaragamuwa',
+            'district' => 'colombo, Kegalle, Rathnapura',
+            'area' => 'Avissawella'
+        ],
         '055' => ['province' => 'Uva', 'district' => 'Monaragala,Badulla', 'area' => 'Monaragala,Badulla'],
         '057' => ['province' => 'Uva', 'district' => 'Badulla', 'area' => 'Bandarawela'],
         '065' => ['province' => 'Eastern', 'district' => 'Batticaloa', 'area' => 'Batticaloa'],
@@ -75,12 +79,25 @@ class PhoneNumber
 
     public function getData(): array
     {
-        if (! preg_match('/^0[0-9]{9}$/', $this->number)) {
+        if (! preg_match('/^0[0-9]{9}$/', $this->number) &&
+            ! preg_match('/^\+94[0-9]{9}$/', $this->number) &&
+            ! preg_match('/^0094[0-9]{9}$/', $this->number)
+        ) {
             throw new InvalidArgumentException('Invalid Phone number.');
         }
 
+        $number = $this->number;
+
+        if (substr($this->number, 0, 3) == '+94') {
+            $number = '0'.substr($this->number, 3);
+        }
+
+        if (substr($this->number, 0, 4) == '0094') {
+            $number = '0'.substr($this->number, 4);
+        }
+
         return [
-          'number' => $this->number
+          'number' => $number
         ];
     }
 
