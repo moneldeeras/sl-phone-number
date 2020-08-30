@@ -41,7 +41,8 @@
         "check-style-test": "phpcs tests --exclude=PSR1.Methods.CamelCapsMethodName,Generic.Files.LineLength",
         "csf": "composer run fix-style && composer run fix-style-test",
         "fix-style": "phpcbf src",
-        "fix-style-test": "phpcbf tests --exclude=PSR1.Methods.CamelCapsMethodName,Generic.Files.LineLength"
+        "fix-style-test": "phpcbf tests --exclude=PSR1.Methods.CamelCapsMethodName,Generic.Files.LineLength",
+        "test-all": "composer run test && composer run cs"
     },
     "extra": {
         "branch-alias": {

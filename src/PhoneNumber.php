@@ -8,6 +8,9 @@ use InvalidArgumentException;
 
 class PhoneNumber
 {
+    const TYPE_MOBILE = 'mobile';
+    const TYPE_FIXED = 'fixed';
+
     private $areaCode = [
         '063' => ['province' => 'Eastern', 'district' => 'Ampara', 'area' => 'Ampara'],
         '025' => ['province' => 'North Central', 'district' => 'Anuradhapura', 'area' => 'Anuradhapura'],
@@ -77,38 +80,68 @@ class PhoneNumber
         $this->number = $number;
     }
 
-    public function getData(): array
+    public function getDetails(): PhoneNumberDetail
     {
-        if (! preg_match('/^0[0-9]{9}$/', $this->number) &&
-            ! preg_match('/^\+94[0-9]{9}$/', $this->number) &&
-            ! preg_match('/^0094[0-9]{9}$/', $this->number)
-        ) {
-            throw new InvalidArgumentException('Invalid Phone number.');
+        if ($this->isFormatValid()) {
+            $number = $this->toLocalFormat();
+
+            $prefix = substr($number, 0, 3);
+
+            if (array_key_exists($prefix, $this->mobileOperatorCode)) {
+                return new PhoneNumberDetail($number, self::TYPE_MOBILE, $this->mobileOperatorCode[$prefix]['name']);
+            }
+
+            if (array_key_exists($prefix, $this->areaCode)) {
+                $operatorCode = substr($number, 3, 1);
+                if (array_key_exists($operatorCode, $this->operatorCode)) {
+                    return new PhoneNumberDetail(
+                        $number,
+                        self::TYPE_FIXED,
+                        $this->operatorCode[$operatorCode]['name'],
+                        $this->areaCode[$prefix]
+                    );
+                }
+            }
         }
 
-        $number = $this->number;
-
-        if (substr($this->number, 0, 3) == '+94') {
-            $number = '0'.substr($this->number, 3);
-        }
-
-        if (substr($this->number, 0, 4) == '0094') {
-            $number = '0'.substr($this->number, 4);
-        }
-
-        return [
-          'number' => $number
-        ];
+        throw new InvalidArgumentException('Invalid Phone number.');
     }
 
     public function isValid(): bool
     {
         try {
-            $this->getData();
+            $this->getDetails();
 
             return true;
         } catch (InvalidArgumentException $exception) {
             return false;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFormatValid(): bool
+    {
+        return preg_match('/^0[0-9]{9}$/', $this->number) ||
+            preg_match('/^\+94[0-9]{9}$/', $this->number) ||
+            preg_match('/^0094[0-9]{9}$/', $this->number);
+    }
+
+    /**
+     * @return string
+     */
+    private function toLocalFormat(): string
+    {
+        $number = $this->number;
+
+        if (substr($this->number, 0, 3) == '+94') {
+            $number = '0' . substr($this->number, 3);
+        }
+
+        if (substr($this->number, 0, 4) == '0094') {
+            $number = '0' . substr($this->number, 4);
+        }
+        return $number;
     }
 }
